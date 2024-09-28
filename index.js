@@ -8,7 +8,7 @@ app.use(express.json());
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: FontFaceSetLoadEvent
+    rejectUnauthorized: false
   }
 });
 
@@ -49,6 +49,20 @@ app.put('/update-user', async (req, res) => {
         res.status(500).send('Error updating user');
     }
 })
+
+app.delete('/delete-user', async (req, res) => {
+  const { id } = req.query;
+  try {
+      const result = await pool.query('DELETE FROM users WHERE id = $1', [Number(id)]);
+      if (result.rowCount === 0) {
+          return res.status(404).send('User not found');
+      }
+      res.status(200).send('User deleted successfully');
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Error deleting user');
+  }
+});
   
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
